@@ -9,7 +9,7 @@ import admin
 import location_handler
 import admin_panel
 
-
+print("✅ Бот запускается на Render...")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -22,5 +22,8 @@ location_handler.register(dp)
 admin_panel.register(dp)
 
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
-
+    try:
+        print("🚀 Бот начинает слушать Telegram...")
+        executor.start_polling(dp, skip_updates=True)
+    except Exception as e:
+        print(f"❌ Ошибка запуска: {e}")
