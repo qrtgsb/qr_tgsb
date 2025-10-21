@@ -95,7 +95,11 @@ def register(dp):
 
         document = InputFile(file, "Отчет_за_сегодня.xlsx")
 
-        await callback_query.message.answer_document(
-            document=document,
-            caption="📤 Вот Excel-отчёт за сегодня"
-        )
+        # ✅ Обернуто в try/except
+        try:
+            await callback_query.message.answer_document(
+                document=document,
+                caption="📤 Вот Excel-отчёт за сегодня"
+            )
+        except Exception as e:
+            await callback_query.message.answer(f"❌ Ошибка при отправке отчёта: {e}")
