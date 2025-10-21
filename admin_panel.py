@@ -58,28 +58,21 @@ def register(dp):
             lat = emp.get('latitude')
             lon = emp.get('longitude')
 
-            # Локация и статус
+            # Локация
             if lat is None or lon is None:
                 location_status = "Не отправлено"
-                status = "Локация не отправлена"
                 late_status = "—"
             else:
                 actual_location = (lat, lon)
                 meters = distance(actual_location, WORK_LOCATION).meters
-                location_ok = meters <= 500
-                location_status = "В рабочем месте" if location_ok else "Вне рабочего места"
+                location_status = "В рабочем месте" if meters <= 500 else "Вне рабочего места"
 
                 # Опоздание
                 is_late = dt.time() > datetime.time(8, 30)
                 late_status = "Да" if is_late else "Нет"
 
-                # Статус
-                if not location_ok:
-                    status = "Вне рабочего места"
-                elif is_late:
-                    status = "Опоздал"
-                else:
-                    status = "Прибыл вовремя"
+            # ✅ Используем статус из базы
+            status = emp.get("status", "—")
 
             ws.append([
                 emp['full_name'],
