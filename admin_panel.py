@@ -8,8 +8,8 @@ from openpyxl import Workbook
 from geopy.distance import distance  # добавь в зависимости: pip install geopy
 
 # Координаты рабочего места (Туркестан)
-WORK_LAT = 43.270355
-WORK_LON = 68.285416
+WORK_LAT = 43.27043
+WORK_LON = 68.2856
 WORK_LOCATION = (WORK_LAT, WORK_LON)
 
 def register(dp):
@@ -36,7 +36,7 @@ def register(dp):
         ws.title = "Отчёт"
 
         # Заголовки
-        ws.append(["ФИО", "Время", "Локация (≤500м)", "Опоздание после 08:30", "Статус"])
+        ws.append(["ФИО", "Время", "Локация (≤500м)", "Опоздание после 09:00", "Статус"])
 
         for emp in entries:
             raw_ts = emp.get('timestamp')
@@ -70,7 +70,7 @@ def register(dp):
                 location_status = "В рабочем месте" if location_ok else "Вне рабочего места"
 
                 # Опоздание
-                is_late = dt.time() > datetime.time(8, 30)
+                is_late = dt.time() > datetime.time(8,  30)
                 late_status = "Да" if is_late else "Нет"
 
                 # Статус
@@ -95,11 +95,7 @@ def register(dp):
 
         document = InputFile(file, "Отчет_за_сегодня.xlsx")
 
-        # ✅ Обернуто в try/except
-        try:
-            await callback_query.message.answer_document(
-                document=document,
-                caption="📤 Вот Excel-отчёт за сегодня"
-            )
-        except Exception as e:
-            await callback_query.message.answer(f"❌ Ошибка при отправке отчёта: {e}")
+        await callback_query.message.answer_document(
+            document=document,
+            caption="📤 Вот Excel-отчёт за сегодня"
+        )
