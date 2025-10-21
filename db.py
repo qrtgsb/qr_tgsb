@@ -27,6 +27,12 @@ def init_db():
         )
     """)
 
+    # ✅ Добавляем колонку status, если её нет
+    try:
+        cursor.execute("ALTER TABLE attendance ADD COLUMN status TEXT")
+    except sqlite3.OperationalError:
+        pass  # колонка уже есть
+
     conn.commit()
     conn.close()
 
@@ -67,14 +73,15 @@ def link_telegram_id(emp_id, tg_id):
     conn.commit()
     conn.close()
 
-def mark_attendance(emp_id, lat, lon):
+# ✅ Теперь принимает статус
+def mark_attendance(emp_id, lat, lon, status):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute("""
-        INSERT INTO attendance (emp_id, timestamp, latitude, longitude)
-        VALUES (?, ?, ?, ?)
-    """, (emp_id, timestamp, lat, lon))
+        INSERT INTO attendance (emp_id, timestamp, latitude, longitude, status)
+        VALUES (?, ?, ?, ?, ?)
+    """, (emp_id, timestamp, lat, lon, status))
     conn.commit()
     conn.close()
 
@@ -118,13 +125,13 @@ def get_employee_by_id(emp_id):
     conn.close()
     return result
 
-
+# ✅ Теперь возвращает status
 def get_today_attendance():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     today = datetime.now().strftime("%Y-%m-%d")
     cursor.execute("""
-        SELECT a.timestamp, a.latitude, a.longitude, e.full_name
+        SELECT a.timestamp, a.latitude, a.longitude, a.status, e.full_name
         FROM attendance a
         JOIN employees e ON a.emp_id = e.emp_id
         WHERE DATE(a.timestamp) = ?
@@ -137,7 +144,8 @@ def get_today_attendance():
             "timestamp": row[0],
             "latitude": row[1],
             "longitude": row[2],
-            "full_name": row[3]
+            "status": row[3],
+            "full_name": row[4]
         }
         for row in rows
     ]
