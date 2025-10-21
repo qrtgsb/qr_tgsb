@@ -10,7 +10,7 @@ from db import (
 )
 from config import ADMIN_ID
 
-OFFICE_LOCATION = (42.3145, 69.5901)  # координаты офиса
+OFFICE_LOCATION = (43.270355, 68.285416)  # координаты офиса
 
 def register(dp):
     @dp.message_handler(state=LocationStates.waiting_for_employee_search)
