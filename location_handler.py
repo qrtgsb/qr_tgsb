@@ -9,7 +9,6 @@ from db import (
     is_within_radius
 )
 from config import ADMIN_ID
-from datetime import datetime, time
 
 OFFICE_LOCATION = (43.270355, 68.285416)  # координаты офиса
 
@@ -71,32 +70,24 @@ def register(dp):
         full_name = employee[1] if employee else f"Неизвестный ({user_id})"
         user_location = (location.latitude, location.longitude)
 
-        # ✅ Проверка геозоны
         within_zone = is_within_radius(user_location, OFFICE_LOCATION)
 
-        # ✅ Проверка времени
-        arrival_time = datetime.now().time()
-        cutoff = time(8, 30)
-        is_late = arrival_time > cutoff
-        status = "Опоздал" if is_late else "Прибыл вовремя"
-
-        # ✅ Сохраняем отметку с гео и статусом
-        mark_attendance(emp_id, location.latitude, location.longitude, status)
+        # ✅ сохраняем отметку независимо от зоны
+        mark_attendance(emp_id, *user_location)
 
         if within_zone:
-            await message.answer(
-                f"✅ Отметка входа сохранена.\n🕒 Время: {arrival_time.strftime('%H:%M')}\n📌 Статус: {status}"
-            )
+            await message.answer("✅ Отметка входа сохранена.")
             await state.finish()
         else:
+            # ❌ Вне зоны — предлагаем повторную отправку
             keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
             button = types.KeyboardButton("📍 Повторно отправить геолокацию", request_location=True)
             keyboard.add(button)
 
             await message.answer(
-                f"⚠️ Вы вне допустимой зоны (500 м).\n"
-                f"🕒 Время: {arrival_time.strftime('%H:%M')}\n📌 Статус: {status}\n\n"
-                "📡 Убедитесь, что GPS включён и вы находитесь рядом с офисом.\n"
+                "⚠️ Вы вне допустимой зоны (500 м).\n"
+                "📡 Убедитесь, что GPS включён и вы находитесь рядом с офисом.\n\n"
                 "🔁 Вы можете повторно отправить геолокацию:",
                 reply_markup=keyboard
             )
+            # FSM остаётся в ожидании геолокации
