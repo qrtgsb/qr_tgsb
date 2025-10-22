@@ -1,6 +1,7 @@
-from aiogram import Bot, Dispatcher
+from aiohttp import web
+from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.utils.executor import start_webhook
+from aiogram.types import Update
 from config import BOT_TOKEN
 
 import start
@@ -19,39 +20,45 @@ WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 WEBAPP_HOST = "0.0.0.0"
 WEBAPP_PORT = 10000
 
-# ✅ Инициализация бота
+# ✅ Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-# 🔧 Инициализация базы данных
+# 🔧 Инициализация базы данных и хендлеров
 init_db()
-
-# 🔧 Регистрация хендлеров
 start.register(dp)
 auth.register(dp)
 location_handler.register(dp)
 admin_panel.register(dp)
 
-# 🚀 При старте
-async def on_startup(dp):
+# 📩 Обработка входящих обновлений от Telegram
+async def handle_webhook(request):
+    try:
+        data = await request.json()
+        update = Update.to_object(data)
+        await dp.process_update(update)
+    except Exception as e:
+        print(f"❌ Ошибка обработки обновления: {e}")
+    return web.Response()
+
+# 🚀 При старте приложения
+async def on_startup(app):
     print(f"📡 Установка webhook на {WEBHOOK_URL}")
     await bot.set_webhook(WEBHOOK_URL)
     print("✅ Webhook установлен")
 
-# 🛑 При завершении
-async def on_shutdown(dp):
-    print("❌ Отключение вебхука...")
+# 🛑 При завершении приложения
+async def on_shutdown(app):
+    print("❌ Отключение webhook...")
     await bot.delete_webhook()
 
-# 🧠 Запуск
+# 🌐 Создание aiohttp-приложения
+app = web.Application()
+app.router.add_post(WEBHOOK_PATH, handle_webhook)
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
+
+# 🧠 Запуск сервера
 if __name__ == "__main__":
-    print("🚀 Бот запускается через Webhook...")
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT,
-    )
+    print("🚀 Бот запускается через aiohttp...")
+    web.run_app(app, host=WEBAPP_HOST, port=WEBAPP_PORT)
