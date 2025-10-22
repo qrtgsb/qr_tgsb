@@ -34,6 +34,7 @@ admin_panel.register(dp)
 
 # 🚀 При старте
 async def on_startup(dp):
+    print(f"📡 Установка webhook на {WEBHOOK_URL}")
     await bot.set_webhook(WEBHOOK_URL)
     print("✅ Webhook установлен")
 
