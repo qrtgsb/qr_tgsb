@@ -12,7 +12,7 @@ import location_handler
 import admin_panel
 
 # 🌐 Webhook настройки
-WEBHOOK_HOST = "https://qrtgsb.onrender.com"  # ← замени на свой Render-домен
+WEBHOOK_HOST = "https://qr-tgsb.onrender.com"  # ← замени на свой Render-домен
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
