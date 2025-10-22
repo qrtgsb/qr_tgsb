@@ -201,7 +201,7 @@ def get_today_attendance():
 def is_within_radius(user_location, center_location, radius_meters=500):
     distance = geodesic(user_location, center_location).meters
     return distance <= radius_meters
-это db.pu
+# это db.pu
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from states import LocationStates
