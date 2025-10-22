@@ -1,5 +1,5 @@
 from aiohttp import web
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Update
 from config import BOT_TOKEN
@@ -13,7 +13,7 @@ import location_handler
 import admin_panel
 
 # 🌐 Webhook настройки
-WEBHOOK_HOST = "https://qr-tgsb.onrender.com"  # ← замени на свой Render-домен
+WEBHOOK_HOST = "https://qr-tgsb.onrender.com"  # ← твой Render-домен
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
@@ -41,6 +41,10 @@ async def handle_webhook(request):
         print(f"❌ Ошибка обработки обновления: {e}")
     return web.Response()
 
+# 👋 Health check для Render
+async def handle_root(request):
+    return web.Response(text="✅ Бот работает и слушает Telegram")
+
 # 🚀 При старте приложения
 async def on_startup(app):
     print(f"📡 Установка webhook на {WEBHOOK_URL}")
@@ -55,6 +59,7 @@ async def on_shutdown(app):
 # 🌐 Создание aiohttp-приложения
 app = web.Application()
 app.router.add_post(WEBHOOK_PATH, handle_webhook)
+app.router.add_get("/", handle_root)
 app.on_startup.append(on_startup)
 app.on_shutdown.append(on_shutdown)
 
