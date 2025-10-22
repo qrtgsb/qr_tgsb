@@ -52,7 +52,7 @@ async def confirm_selection(callback: types.CallbackQuery):
     keyboard.add(types.KeyboardButton(text="📍 Отправить геолокацию", request_location=True))
 
     await callback.message.answer("Пожалуйста, отправьте свою геолокацию для отметки входа:", reply_markup=keyboard)
-это был auth.py
+# это был auth.py
 import sqlite3
 from datetime import datetime
 from geopy.distance import geodesic
