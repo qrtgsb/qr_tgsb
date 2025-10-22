@@ -24,6 +24,10 @@ WEBAPP_PORT = 10000
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
+# 🔧 Установка текущего контекста
+Bot.set_current(bot)
+Dispatcher.set_current(dp)
+
 # 🔧 Инициализация базы данных и хендлеров
 init_db()
 start.register(dp)
@@ -55,6 +59,7 @@ async def on_startup(app):
 async def on_shutdown(app):
     print("❌ Отключение webhook...")
     await bot.delete_webhook()
+    await bot.session.close()
 
 # 🌐 Создание aiohttp-приложения
 app = web.Application()
